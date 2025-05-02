@@ -1,28 +1,18 @@
-# Detect OS and set proper activate & pip paths
-ifeq ($(OS),Windows_NT)
-	PY ?= python
-	ENV_DIR ?= .venv
-	ACTIVATE = $(ENV_DIR)\Scripts\activate
-	PIP = $(ENV_DIR)\Scripts\pip.exe
-else
-	PY ?= python3
-	ENV_DIR ?= .venv
-	ACTIVATE = source $(ENV_DIR)/bin/activate
-	PIP = $(ENV_DIR)/bin/pip
-endif
+PY ?= python3
+ENV_DIR ?= .venv
 
 # Setup virtual environment and install dependencies
 .PHONY: setup
 setup:
 	$(PY) -m venv $(ENV_DIR)
-	$(PIP) install --upgrade pip
-	$(PIP) install -r requirements.txt
-	$(PIP) install jupyter pytest nbconvert
+	$(ENV_DIR)/bin/pip install --upgrade pip
+	$(ENV_DIR)/bin/pip install -r requirements.txt
+	$(ENV_DIR)/bin/pip install jupyter pytest nbconvert
 
 # Run all Jupyter Notebooks
 .PHONY: run
 run:
-	$(ACTIVATE) && \
+	source $(ENV_DIR)/bin/activate && \
 	jupyter nbconvert --to notebook --execute notebooks/week1-2.ipynb --inplace && \
 	jupyter nbconvert --to notebook --execute notebooks/week3-4.ipynb --inplace && \
 	jupyter nbconvert --to notebook --execute notebooks/week5-6.ipynb --inplace && \
@@ -31,16 +21,15 @@ run:
 # Install dependencies only
 .PHONY: install
 install:
-	$(PIP) install -r requirements.txt
+	$(ENV_DIR)/bin/pip install -r requirements.txt
 
 # Run tests
 .PHONY: test
 test:
-	$(ACTIVATE) && pytest tests/
+	$(ENV_DIR)/bin/pytest tests/
 
 # Clean the environment and temp files
 .PHONY: clean
 clean:
 	rm -rf $(ENV_DIR)
 	rm -rf __pycache__ .ipynb_checkpoints
-	rm -rf notebooks/__pycache__
